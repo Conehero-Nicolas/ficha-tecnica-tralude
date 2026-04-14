@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#c8102e" />
+    <title>Ficha Técnica — Tralude Laticínios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  </head>
+  <body>
+    <!-- ========================================================
+       TELA DE LOGIN (aparece antes de tudo)
+       ======================================================== -->
+    <div id="tela-login" class="login" hidden>
+      <div class="login__card">
+        <div class="login__logo">JK</div>
+        <h1 class="login__titulo">Ficha Técnica</h1>
+        <p class="login__sub">Tralude Laticínios</p>
+
+        <form id="form-login" class="login__form" autocomplete="off">
+          <label for="senha" class="login__label">Senha de acesso</label>
+          <input
+            type="password"
+            id="senha"
+            class="login__input"
+            placeholder="Digite a senha"
+            autocomplete="current-password"
+            required
+          />
+
+          <div id="login-erro" class="login__erro" hidden></div>
+
+          <button
+            type="submit"
+            id="btn-login"
+            class="btn btn--primary login__btn"
+          >
+            <span class="login__btn-label">Entrar</span>
+            <span class="login__btn-loading" hidden>
+              <span class="spinner spinner--white"></span>
+              Validando...
+            </span>
+          </button>
+        </form>
+
+        <p class="login__rodape">
+          Acesso restrito aos gestores da Tralude.<br />
+          <small>Desenvolvido por JK Consultoria Empresarial</small>
+        </p>
+      </div>
+    </div>
+
+    <!-- ========================================================
+       APP PRINCIPAL (aparece depois do login)
+       ======================================================== -->
+    <div id="app" hidden>
+      <!-- ===== HEADER ===== -->
+      <header class="topbar">
+        <div class="topbar__inner">
+          <div class="brand">
+            <div class="brand__logo">JK</div>
+            <div class="brand__text">
+              <span class="brand__title">Ficha Técnica</span>
+              <span class="brand__sub">Tralude Laticínios</span>
+            </div>
+          </div>
+          <div class="topbar__direita">
+            <div class="brand__badge">Consultoria JK</div>
+            <button id="btn-sair" class="btn-sair" title="Sair">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>Sair</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container">
+        <!-- ===== TELA 1: LISTA DE PRODUTOS ===== -->
+        <section id="tela-lista" class="tela tela--ativa">
+          <div class="hero">
+            <h1 class="hero__title">Produtos cadastrados</h1>
+            <p class="hero__sub">
+              Selecione um produto para visualizar sua ficha técnica completa.
+            </p>
+          </div>
+
+          <div class="search">
+            <svg
+              class="search__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="text"
+              id="busca"
+              class="search__input"
+              placeholder="Buscar produto..."
+              autocomplete="off"
+            />
+            <button
+              id="btn-limpar-busca"
+              class="search__clear"
+              aria-label="Limpar busca"
+            >
+              ×
+            </button>
+          </div>
+
+          <div id="status-lista" class="status">
+            <div class="spinner"></div>
+            <span>Carregando produtos...</span>
+          </div>
+
+          <div id="contador" class="contador" hidden></div>
+
+          <ul id="lista-produtos" class="produtos"></ul>
+        </section>
+
+        <!-- ===== TELA 2: DETALHES DA FICHA ===== -->
+        <section id="tela-ficha" class="tela">
+          <button id="btn-voltar" class="btn-voltar">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Voltar
+          </button>
+
+          <div id="status-ficha" class="status" hidden>
+            <div class="spinner"></div>
+            <span>Carregando ficha técnica...</span>
+          </div>
+
+          <div id="ficha-conteudo" class="ficha" hidden>
+            <div class="ficha__header">
+              <div>
+                <p class="ficha__label">Produto</p>
+                <h2 id="ficha-titulo" class="ficha__titulo"></h2>
+              </div>
+              <div class="ficha__meta">
+                <p class="ficha__label">Gerado em</p>
+                <p id="ficha-data" class="ficha__data"></p>
+              </div>
+            </div>
+
+            <div class="cards">
+              <div class="card">
+                <p class="card__label">Custo total</p>
+                <p
+                  id="card-custo"
+                  class="card__valor card__valor--destaque"
+                ></p>
+              </div>
+              <div class="card">
+                <p class="card__label">Itens na ficha</p>
+                <p id="card-itens" class="card__valor"></p>
+              </div>
+            </div>
+
+            <h3 class="ficha__subtitulo">Composição de insumos</h3>
+
+            <div class="tabela-wrap">
+              <table id="tabela-insumos" class="tabela">
+                <thead>
+                  <tr>
+                    <th>Insumo</th>
+                    <th class="num">R$ Unit.</th>
+                    <th class="num">Qtde</th>
+                    <th>Un.</th>
+                    <th class="num">Total</th>
+                    <th class="num">% Part.</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-body"></tbody>
+              </table>
+            </div>
+
+            <div id="insumos-cards" class="insumos-cards"></div>
+          </div>
+
+          <div class="acoes">
+            <button id="btn-pdf" class="btn btn--primary" hidden>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <path d="M14 2v6h6" />
+                <path d="M12 18v-6" />
+                <path d="m9 15 3 3 3-3" />
+              </svg>
+              Exportar PDF
+            </button>
+            <button id="btn-imprimir" class="btn btn--ghost" hidden>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M6 9V2h12v7" />
+                <path
+                  d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+                />
+                <path d="M6 14h12v8H6z" />
+              </svg>
+              Imprimir
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="rodape">
+        <p>
+          © 2026 JK Consultoria Empresarial · Desenvolvido para Tralude
+          Laticínios
+        </p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
