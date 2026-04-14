@@ -1,15 +1,17 @@
 /* ============================================================
-   FICHA TÉCNICA PRO — v2 (com login)
+   FICHA TÉCNICA PRO — Etapa 2.1
    Identidade: JK Consultoria (vermelho + cinza/prata)
    ============================================================ */
 
 :root {
+  /* Cores da marca JK */
   --jk-red: #c8102e;
   --jk-red-dark: #a00d25;
   --jk-red-light: #ffe8ec;
   --jk-silver: #9ea4ab;
   --jk-graphite: #2d3138;
 
+  /* Neutros */
   --bg: #f5f6f8;
   --surface: #ffffff;
   --border: #e5e7eb;
@@ -17,14 +19,15 @@
   --text-muted: #6b7280;
   --text-faint: #9ca3af;
 
+  /* Feedback */
   --success: #059669;
   --warning: #d97706;
   --danger: #dc2626;
 
+  /* Sombras */
   --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.04);
   --shadow-md: 0 4px 12px rgba(17, 24, 39, 0.08);
   --shadow-lg: 0 12px 32px rgba(17, 24, 39, 0.1);
-  --shadow-xl: 0 24px 48px rgba(17, 24, 39, 0.15);
 
   --radius: 12px;
   --radius-sm: 8px;
@@ -63,177 +66,6 @@ ul {
   list-style: none;
 }
 
-/* ============================================================
-   TELA DE LOGIN
-   ============================================================ */
-.login {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(200, 16, 46, 0.08) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 100%,
-      rgba(158, 164, 171, 0.15) 0%,
-      transparent 50%
-    ),
-    var(--bg);
-}
-.login[hidden] {
-  display: none;
-}
-
-.login__card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--surface);
-  border-radius: 20px;
-  padding: 40px 36px 32px;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border);
-  text-align: center;
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login__logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 18px;
-  background: linear-gradient(
-    135deg,
-    var(--jk-red) 0%,
-    var(--jk-red-dark) 100%
-  );
-  color: #fff;
-  font-weight: 800;
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: -1px;
-  margin: 0 auto 20px;
-  box-shadow: 0 8px 24px rgba(200, 16, 46, 0.3);
-}
-
-.login__titulo {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--jk-graphite);
-  letter-spacing: -0.5px;
-  margin-bottom: 4px;
-}
-.login__sub {
-  color: var(--text-muted);
-  font-size: 14px;
-  margin-bottom: 28px;
-}
-
-.login__form {
-  text-align: left;
-  margin-bottom: 24px;
-}
-.login__label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-.login__input {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  color: var(--text);
-  transition: all 0.2s;
-  margin-bottom: 16px;
-}
-.login__input:focus {
-  outline: none;
-  border-color: var(--jk-red);
-  background: var(--surface);
-  box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.1);
-}
-
-.login__erro {
-  background: #fef2f2;
-  color: var(--danger);
-  border: 1px solid #fecaca;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  margin-bottom: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.login__erro::before {
-  content: "⚠️";
-}
-.login__erro[hidden] {
-  display: none;
-}
-
-.login__btn {
-  width: 100%;
-  justify-content: center;
-  padding: 14px 20px;
-  font-size: 15px;
-}
-.login__btn-loading {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.login__btn-loading[hidden],
-.login__btn-label[hidden] {
-  display: none;
-}
-
-.spinner--white {
-  border-color: rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
-}
-
-.login__rodape {
-  font-size: 12px;
-  color: var(--text-faint);
-  line-height: 1.6;
-}
-.login__rodape small {
-  font-size: 11px;
-  opacity: 0.75;
-}
-
-/* ============================================================
-   APP PRINCIPAL
-   ============================================================ */
-#app[hidden] {
-  display: none;
-}
-
 /* ===== TOPBAR ===== */
 .topbar {
   background: var(--surface);
@@ -251,11 +83,6 @@ ul {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-}
-.topbar__direita {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 .brand {
   display: flex;
@@ -303,30 +130,6 @@ ul {
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-/* Botão Sair */
-.btn-sair {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  background: var(--surface);
-  transition: all 0.15s;
-}
-.btn-sair:hover {
-  color: var(--jk-red);
-  border-color: var(--jk-red);
-  background: var(--jk-red-light);
-}
-.btn-sair svg {
-  width: 16px;
-  height: 16px;
 }
 
 /* ===== CONTAINER ===== */
@@ -441,7 +244,6 @@ ul {
 .status[hidden] {
   display: none;
 }
-
 .spinner {
   width: 20px;
   height: 20px;
@@ -449,7 +251,6 @@ ul {
   border-top-color: var(--jk-red);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  display: inline-block;
 }
 @keyframes spin {
   to {
@@ -574,6 +375,7 @@ ul {
   font-weight: 500;
 }
 
+/* ===== CARDS DE RESUMO ===== */
 .cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -613,7 +415,7 @@ ul {
   margin-bottom: 12px;
 }
 
-/* ===== TABELA ===== */
+/* ===== TABELA (desktop) ===== */
 .tabela-wrap {
   overflow-x: auto;
 }
@@ -750,10 +552,6 @@ ul {
   font-size: 14px;
   transition: all 0.18s;
 }
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 .btn svg {
   width: 18px;
   height: 18px;
@@ -763,7 +561,7 @@ ul {
   color: #fff;
   box-shadow: 0 2px 8px rgba(200, 16, 46, 0.25);
 }
-.btn--primary:hover:not(:disabled) {
+.btn--primary:hover {
   background: var(--jk-red-dark);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(200, 16, 46, 0.35);
@@ -790,31 +588,13 @@ ul {
 }
 
 /* ============================================================
-   RESPONSIVO
+   RESPONSIVO — Mobile first breakpoints
    ============================================================ */
 @media (max-width: 720px) {
   .brand__badge {
     display: none;
   }
-  .btn-sair span {
-    display: none;
-  }
-  .btn-sair {
-    padding: 8px;
-  }
   .hero__title {
-    font-size: 22px;
-  }
-
-  .login__card {
-    padding: 32px 24px 24px;
-  }
-  .login__logo {
-    width: 64px;
-    height: 64px;
-    font-size: 24px;
-  }
-  .login__titulo {
     font-size: 22px;
   }
 
@@ -836,6 +616,7 @@ ul {
     grid-template-columns: 1fr;
   }
 
+  /* Esconde tabela, mostra cards */
   .tabela-wrap {
     display: none;
   }
@@ -853,7 +634,7 @@ ul {
 }
 
 /* ============================================================
-   IMPRESSÃO
+   IMPRESSÃO — limpa tudo que não é ficha
    ============================================================ */
 @media print {
   .topbar,
@@ -861,8 +642,7 @@ ul {
   .acoes,
   .rodape,
   .search,
-  .hero,
-  .login {
+  .hero {
     display: none !important;
   }
   body {
