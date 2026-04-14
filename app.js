@@ -4,7 +4,8 @@
    ============================================================ */
 
 // ⚠️ IMPORTANTE: substitua pela SUA URL do Web App do Apps Script
-const API_URL = "https://script.google.com/macros/s/COLE_SUA_URL_AQUI/exec";
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwtomi7uA8YBllh5ZaXDUUyKzTIm9rtdmiCsPYqJK7Hx7EPKduJyRIStbzwMCW3Lpw/exec";
 
 // Chave usada pra guardar o token no navegador
 const TOKEN_KEY = "jk_tralude_token";
