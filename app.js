@@ -1,15 +1,21 @@
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwtomi7uA8YBllh5ZaXDUUyKzTIm9rtdmiCsPYqJK7Hx7EPKduJyRIStbzwMCW3Lpw/exec";
 
-// ── Estado global do app ───────────────────────────────────
+// ── Estado global ──────────────────────────────────────────
 const state = {
-  produtos: [], // lista completa vinda da API
+  produtos: [], // lista de nomes
   produtosFiltrados: [],
+  fichas: {}, // { "NOME PRODUTO": { ...ficha } }
+  logoUrl: "",
   fichaAtual: null,
 };
 
-// ── Elementos do DOM ───────────────────────────────────────
+// ── DOM ────────────────────────────────────────────────────
 const el = {
+  topbar: document.getElementById("topbar"),
+  brandLogoImg: document.getElementById("brand-logo-img"),
+  brandLogoFallback: document.getElementById("brand-logo-fallback"),
+
   telaLista: document.getElementById("tela-lista"),
   telaFicha: document.getElementById("tela-ficha"),
   busca: document.getElementById("busca"),
@@ -17,11 +23,14 @@ const el = {
   statusLista: document.getElementById("status-lista"),
   contador: document.getElementById("contador"),
   lista: document.getElementById("lista-produtos"),
+
   btnVoltar: document.getElementById("btn-voltar"),
   statusFicha: document.getElementById("status-ficha"),
   fichaConteudo: document.getElementById("ficha-conteudo"),
   fichaTitulo: document.getElementById("ficha-titulo"),
   fichaData: document.getElementById("ficha-data"),
+  fichaFoto: document.getElementById("ficha-foto"),
+  fichaFotoPlaceholder: document.getElementById("ficha-foto-placeholder"),
   cardCusto: document.getElementById("card-custo"),
   cardItens: document.getElementById("card-itens"),
   tabelaBody: document.getElementById("tabela-body"),
@@ -43,31 +52,31 @@ function mostrarErro(container, mensagem) {
   container.hidden = false;
 }
 
-// ── API: chamada genérica ──────────────────────────────────
+// ── API ────────────────────────────────────────────────────
 async function chamarAPI(params) {
   const url = new URL(API_URL);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-
   const resp = await fetch(url.toString(), { method: "GET" });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   return await resp.json();
 }
 
-// ── CARREGAR LISTA DE PRODUTOS ─────────────────────────────
-async function carregarProdutos() {
+// ── BOOT: carrega TUDO em 1 chamada ────────────────────────
+async function carregarTudo() {
   try {
-    const dados = await chamarAPI({ acao: "listarProdutos" });
+    const dados = await chamarAPI({ acao: "tudo" });
 
     if (!dados.sucesso) {
-      mostrarErro(
-        el.statusLista,
-        dados.mensagem || "Falha ao carregar produtos.",
-      );
+      mostrarErro(el.statusLista, dados.mensagem || "Falha ao carregar dados.");
       return;
     }
 
     state.produtos = dados.produtos || [];
     state.produtosFiltrados = [...state.produtos];
+    state.fichas = dados.fichas || {};
+    state.logoUrl = dados.logoUrl || "";
+
+    aplicarLogo();
 
     el.statusLista.hidden = true;
     renderizarLista();
@@ -80,7 +89,23 @@ async function carregarProdutos() {
   }
 }
 
-// ── RENDERIZAR LISTA ───────────────────────────────────────
+// ── LOGO DO CLIENTE ────────────────────────────────────────
+function aplicarLogo() {
+  if (!state.logoUrl) return; // mantém fallback "JK"
+
+  el.brandLogoImg.src = state.logoUrl;
+  el.brandLogoImg.onload = () => {
+    el.brandLogoImg.hidden = false;
+    el.brandLogoFallback.hidden = true;
+  };
+  el.brandLogoImg.onerror = () => {
+    // Se a URL falhar, mantém o JK
+    el.brandLogoImg.hidden = true;
+    el.brandLogoFallback.hidden = false;
+  };
+}
+
+// ── LISTA ──────────────────────────────────────────────────
 function renderizarLista() {
   const lista = state.produtosFiltrados;
 
@@ -106,18 +131,16 @@ function renderizarLista() {
       <svg class="produto-item__seta" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="m9 18 6-6-6-6"/>
       </svg>
-    </li>
-  `,
+    </li>`,
     )
     .join("");
 
-  // Anexa clique em cada item
   el.lista.querySelectorAll(".produto-item").forEach((li) => {
     li.addEventListener("click", () => abrirFicha(li.dataset.produto));
   });
 }
 
-// ── FILTRO DE BUSCA ────────────────────────────────────────
+// ── FILTRO ─────────────────────────────────────────────────
 function filtrarProdutos(termo) {
   const t = termo.trim().toLowerCase();
   state.produtosFiltrados = !t
@@ -126,51 +149,54 @@ function filtrarProdutos(termo) {
   renderizarLista();
 }
 
-// ── ABRIR FICHA DE UM PRODUTO ──────────────────────────────
-async function abrirFicha(nomeProduto) {
+// ── ABRIR FICHA (instantâneo, dados já estão em memória) ──
+function abrirFicha(nomeProduto) {
   mostrarTela("ficha");
 
-  // Esconde tudo e mostra só o spinner
-  el.fichaConteudo.hidden = true;
-  el.btnPdf.hidden = true;
-  el.btnImprimir.hidden = true;
-  el.statusFicha.hidden = false;
-  el.statusFicha.className = "status";
-  el.statusFicha.innerHTML =
-    '<div class="spinner"></div><span>Carregando ficha técnica...</span>';
+  const ficha = state.fichas[nomeProduto];
 
-  try {
-    const dados = await chamarAPI({ acao: "ficha", produto: nomeProduto });
-
-    // Esconde o spinner IMEDIATAMENTE depois de ter os dados
-    el.statusFicha.hidden = true;
-
-    if (!dados.sucesso) {
-      mostrarErro(el.statusFicha, dados.mensagem || "Ficha não encontrada.");
-      return;
-    }
-
-    state.fichaAtual = dados;
-    renderizarFicha(dados);
-
-    el.fichaConteudo.hidden = false;
-    el.btnPdf.hidden = false;
-    el.btnImprimir.hidden = false;
-  } catch (err) {
-    console.error(err);
-    el.statusFicha.hidden = false;
-    mostrarErro(el.statusFicha, "Erro ao buscar ficha técnica.");
+  if (!ficha) {
+    el.fichaConteudo.hidden = true;
+    el.btnPdf.hidden = true;
+    el.btnImprimir.hidden = true;
+    mostrarErro(el.statusFicha, "Ficha não encontrada.");
+    return;
   }
+
+  el.statusFicha.hidden = true;
+  state.fichaAtual = ficha;
+  renderizarFicha(ficha);
+
+  el.fichaConteudo.hidden = false;
+  el.btnPdf.hidden = false;
+  el.btnImprimir.hidden = false;
 }
 
-// ── RENDERIZAR FICHA ───────────────────────────────────────
+// ── RENDERIZAR FICHA ──────────────────────────────────────
 function renderizarFicha(dados) {
   el.fichaTitulo.textContent = dados.produto;
   el.fichaData.textContent = dados.geradoEm;
   el.cardCusto.textContent = dados.custoTotal;
   el.cardItens.textContent = dados.totalItens;
 
-  // Tabela (desktop)
+  // Foto do produto
+  if (dados.imagemUrl) {
+    el.fichaFoto.src = dados.imagemUrl;
+    el.fichaFoto.alt = dados.produto;
+    el.fichaFoto.onload = () => {
+      el.fichaFoto.hidden = false;
+      el.fichaFotoPlaceholder.hidden = true;
+    };
+    el.fichaFoto.onerror = () => {
+      el.fichaFoto.hidden = true;
+      el.fichaFotoPlaceholder.hidden = false;
+    };
+  } else {
+    el.fichaFoto.hidden = true;
+    el.fichaFotoPlaceholder.hidden = false;
+  }
+
+  // Tabela (desktop) — sem coluna Status
   el.tabelaBody.innerHTML = dados.linhas
     .map(
       (l) => `
@@ -181,13 +207,11 @@ function renderizarFicha(dados) {
       <td>${escapeHtml(l.un)}</td>
       <td class="num total-valor">${escapeHtml(l.total)}</td>
       <td class="num part-valor">${escapeHtml(l.part)}</td>
-      <td>${renderStatus(l.status)}</td>
-    </tr>
-  `,
+    </tr>`,
     )
     .join("");
 
-  // Cards (mobile)
+  // Cards (mobile) — sem status
   el.insumosCards.innerHTML = dados.linhas
     .map(
       (l) => `
@@ -211,18 +235,9 @@ function renderizarFicha(dados) {
           <span class="insumo-card__item-valor insumo-card__part">${escapeHtml(l.part)}</span>
         </div>
       </div>
-      ${renderStatus(l.status)}
-    </div>
-  `,
+    </div>`,
     )
     .join("");
-}
-
-function renderStatus(status) {
-  if (!status) return "";
-  const ok = status.toLowerCase().includes("ok");
-  const classe = ok ? "status-ok" : "status-alerta";
-  return `<span class="${classe}">${escapeHtml(status)}</span>`;
 }
 
 // ── EXPORTAR PDF ───────────────────────────────────────────
@@ -235,8 +250,6 @@ function exportarPDF() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") + ".pdf";
 
-  const elemento = el.fichaConteudo;
-
   html2pdf()
     .set({
       margin: [10, 10, 10, 10],
@@ -245,11 +258,11 @@ function exportarPDF() {
       html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     })
-    .from(elemento)
+    .from(el.fichaConteudo)
     .save();
 }
 
-// ── UTILIDADES ─────────────────────────────────────────────
+// ── UTIL ───────────────────────────────────────────────────
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -260,7 +273,7 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// ── EVENT LISTENERS ────────────────────────────────────────
+// ── EVENTOS ────────────────────────────────────────────────
 el.busca.addEventListener("input", (e) => {
   const valor = e.target.value;
   el.btnLimpar.classList.toggle("ativo", valor.length > 0);
@@ -278,5 +291,14 @@ el.btnVoltar.addEventListener("click", () => mostrarTela("lista"));
 el.btnPdf.addEventListener("click", exportarPDF);
 el.btnImprimir.addEventListener("click", () => window.print());
 
-// ── INICIALIZAÇÃO ──────────────────────────────────────────
-carregarProdutos();
+// Header clicável → volta pra lista
+el.topbar.addEventListener("click", () => mostrarTela("lista"));
+el.topbar.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    mostrarTela("lista");
+  }
+});
+
+// ── BOOT ───────────────────────────────────────────────────
+carregarTudo();

@@ -1,17 +1,18 @@
 /* ============================================================
-   FICHA TÉCNICA PRO — Etapa 2.1
-   Identidade: JK Consultoria (vermelho + cinza/prata)
+   FICHA TÉCNICA PRO — v2.2
+   - Header clicável (volta pra lista)
+   - Logo do cliente substituindo o JK
+   - Foto do produto na ficha
+   - Sem coluna Status
    ============================================================ */
 
 :root {
-  /* Cores da marca JK */
   --jk-red: #c8102e;
   --jk-red-dark: #a00d25;
   --jk-red-light: #ffe8ec;
   --jk-silver: #9ea4ab;
   --jk-graphite: #2d3138;
 
-  /* Neutros */
   --bg: #f5f6f8;
   --surface: #ffffff;
   --border: #e5e7eb;
@@ -19,12 +20,10 @@
   --text-muted: #6b7280;
   --text-faint: #9ca3af;
 
-  /* Feedback */
   --success: #059669;
   --warning: #d97706;
   --danger: #dc2626;
 
-  /* Sombras */
   --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.04);
   --shadow-md: 0 4px 12px rgba(17, 24, 39, 0.08);
   --shadow-lg: 0 12px 32px rgba(17, 24, 39, 0.1);
@@ -66,7 +65,7 @@ ul {
   list-style: none;
 }
 
-/* ===== TOPBAR ===== */
+/* ===== TOPBAR (clicável) ===== */
 .topbar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -74,6 +73,15 @@ ul {
   top: 0;
   z-index: 10;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.topbar:hover {
+  background: #fafbfc;
+}
+.topbar:focus-visible {
+  outline: 2px solid var(--jk-red);
+  outline-offset: -2px;
 }
 .topbar__inner {
   max-width: 960px;
@@ -89,6 +97,19 @@ ul {
   align-items: center;
   gap: 12px;
 }
+
+/* Logo do cliente (img) — quando carregada */
+.brand__logo-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+}
+
+/* Fallback (JK) — quando não tem logo na planilha */
 .brand__logo {
   width: 42px;
   height: 42px;
@@ -147,7 +168,6 @@ ul {
 .tela--ativa {
   display: block;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -257,7 +277,6 @@ ul {
     transform: rotate(360deg);
   }
 }
-
 .status--erro {
   color: var(--danger);
   flex-direction: column;
@@ -274,7 +293,7 @@ ul {
   font-weight: 500;
 }
 
-/* ===== LISTA DE PRODUTOS ===== */
+/* ===== LISTA ===== */
 .produtos {
   display: grid;
   gap: 10px;
@@ -343,12 +362,52 @@ ul {
 }
 .ficha__header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   gap: 20px;
+  align-items: flex-start;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 20px;
+}
+
+/* ===== FOTO DO PRODUTO ===== */
+.ficha__foto-wrap {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.ficha__foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ficha__foto-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-faint);
+}
+.ficha__foto-placeholder svg {
+  width: 32px;
+  height: 32px;
+}
+.ficha__foto-placeholder span {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.ficha__header-info {
+  flex: 1;
+  min-width: 0;
 }
 .ficha__label {
   font-size: 11px;
@@ -364,14 +423,19 @@ ul {
   color: var(--jk-graphite);
   letter-spacing: -0.3px;
   line-height: 1.25;
+  margin-bottom: 12px;
 }
-.ficha__meta {
-  text-align: right;
-  flex-shrink: 0;
-}
-.ficha__data {
+.ficha__data-linha {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   font-size: 13px;
   color: var(--text-muted);
+}
+.ficha__data-linha .ficha__label {
+  margin-bottom: 0;
+}
+.ficha__data {
   font-weight: 500;
 }
 
@@ -415,7 +479,7 @@ ul {
   margin-bottom: 12px;
 }
 
-/* ===== TABELA (desktop) ===== */
+/* ===== TABELA ===== */
 .tabela-wrap {
   overflow-x: auto;
 }
@@ -462,27 +526,6 @@ ul {
 .tabela .part-valor {
   font-weight: 600;
   color: var(--jk-red);
-}
-
-.status-ok {
-  display: inline-block;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: #ecfdf5;
-  color: var(--success);
-  font-weight: 600;
-  white-space: nowrap;
-}
-.status-alerta {
-  display: inline-block;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: #fef3c7;
-  color: var(--warning);
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 /* ===== CARDS DE INSUMOS (mobile) ===== */
@@ -535,7 +578,7 @@ ul {
   color: var(--jk-red);
 }
 
-/* ===== AÇÕES / BOTÕES ===== */
+/* ===== AÇÕES ===== */
 .acoes {
   display: flex;
   gap: 10px;
@@ -588,7 +631,7 @@ ul {
 }
 
 /* ============================================================
-   RESPONSIVO — Mobile first breakpoints
+   RESPONSIVO
    ============================================================ */
 @media (max-width: 720px) {
   .brand__badge {
@@ -603,10 +646,12 @@ ul {
   }
   .ficha__header {
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
+    align-items: stretch;
   }
-  .ficha__meta {
-    text-align: left;
+  .ficha__foto-wrap {
+    width: 100%;
+    height: 180px;
   }
   .ficha__titulo {
     font-size: 19px;
@@ -616,7 +661,6 @@ ul {
     grid-template-columns: 1fr;
   }
 
-  /* Esconde tabela, mostra cards */
   .tabela-wrap {
     display: none;
   }
@@ -634,7 +678,7 @@ ul {
 }
 
 /* ============================================================
-   IMPRESSÃO — limpa tudo que não é ficha
+   IMPRESSÃO
    ============================================================ */
 @media print {
   .topbar,
