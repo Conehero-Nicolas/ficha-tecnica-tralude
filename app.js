@@ -3,9 +3,9 @@ const API_URL =
 
 // ── Estado global ──────────────────────────────────────────
 const state = {
-  produtos: [], // lista de nomes
+  produtos: [],
   produtosFiltrados: [],
-  fichas: {}, // { "NOME PRODUTO": { ...ficha } }
+  fichas: {},
   logoUrl: "",
   fichaAtual: null,
 };
@@ -39,6 +39,26 @@ const el = {
   btnImprimir: document.getElementById("btn-imprimir"),
 };
 
+// ── NORMALIZAR URL DE IMAGEM (espelho do backend) ──────────
+// Segunda camada de defesa: se vier algo do cache antigo do
+// Apps Script, ainda funciona.
+function normalizarUrlImagem(url) {
+  if (!url) return "";
+  url = String(url).trim();
+  if (!url) return "";
+
+  let id = "";
+  let m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) id = m[1];
+  if (!id) {
+    m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m) id = m[1];
+  }
+
+  if (id) return "https://lh3.googleusercontent.com/d/" + id;
+  return url;
+}
+
 // ── Helpers ────────────────────────────────────────────────
 function mostrarTela(qual) {
   el.telaLista.classList.toggle("tela--ativa", qual === "lista");
@@ -61,7 +81,7 @@ async function chamarAPI(params) {
   return await resp.json();
 }
 
-// ── BOOT: carrega TUDO em 1 chamada ────────────────────────
+// ── BOOT ───────────────────────────────────────────────────
 async function carregarTudo() {
   try {
     const dados = await chamarAPI({ acao: "tudo" });
@@ -74,7 +94,7 @@ async function carregarTudo() {
     state.produtos = dados.produtos || [];
     state.produtosFiltrados = [...state.produtos];
     state.fichas = dados.fichas || {};
-    state.logoUrl = dados.logoUrl || "";
+    state.logoUrl = normalizarUrlImagem(dados.logoUrl || "");
 
     aplicarLogo();
 
@@ -89,9 +109,9 @@ async function carregarTudo() {
   }
 }
 
-// ── LOGO DO CLIENTE ────────────────────────────────────────
+// ── LOGO ───────────────────────────────────────────────────
 function aplicarLogo() {
-  if (!state.logoUrl) return; // mantém fallback "JK"
+  if (!state.logoUrl) return;
 
   el.brandLogoImg.src = state.logoUrl;
   el.brandLogoImg.onload = () => {
@@ -99,7 +119,6 @@ function aplicarLogo() {
     el.brandLogoFallback.hidden = true;
   };
   el.brandLogoImg.onerror = () => {
-    // Se a URL falhar, mantém o JK
     el.brandLogoImg.hidden = true;
     el.brandLogoFallback.hidden = false;
   };
@@ -149,12 +168,11 @@ function filtrarProdutos(termo) {
   renderizarLista();
 }
 
-// ── ABRIR FICHA (instantâneo, dados já estão em memória) ──
+// ── ABRIR FICHA ────────────────────────────────────────────
 function abrirFicha(nomeProduto) {
   mostrarTela("ficha");
 
   const ficha = state.fichas[nomeProduto];
-
   if (!ficha) {
     el.fichaConteudo.hidden = true;
     el.btnPdf.hidden = true;
@@ -179,9 +197,10 @@ function renderizarFicha(dados) {
   el.cardCusto.textContent = dados.custoTotal;
   el.cardItens.textContent = dados.totalItens;
 
-  // Foto do produto
-  if (dados.imagemUrl) {
-    el.fichaFoto.src = dados.imagemUrl;
+  // Foto do produto (com normalização defensiva)
+  const fotoUrl = normalizarUrlImagem(dados.imagemUrl || "");
+  if (fotoUrl) {
+    el.fichaFoto.src = fotoUrl;
     el.fichaFoto.alt = dados.produto;
     el.fichaFoto.onload = () => {
       el.fichaFoto.hidden = false;
@@ -196,7 +215,7 @@ function renderizarFicha(dados) {
     el.fichaFotoPlaceholder.hidden = false;
   }
 
-  // Tabela (desktop) — sem coluna Status
+  // Tabela (desktop)
   el.tabelaBody.innerHTML = dados.linhas
     .map(
       (l) => `
@@ -211,7 +230,7 @@ function renderizarFicha(dados) {
     )
     .join("");
 
-  // Cards (mobile) — sem status
+  // Cards (mobile)
   el.insumosCards.innerHTML = dados.linhas
     .map(
       (l) => `
@@ -240,7 +259,7 @@ function renderizarFicha(dados) {
     .join("");
 }
 
-// ── EXPORTAR PDF ───────────────────────────────────────────
+// ── PDF ────────────────────────────────────────────────────
 function exportarPDF() {
   if (!state.fichaAtual) return;
 
@@ -291,7 +310,6 @@ el.btnVoltar.addEventListener("click", () => mostrarTela("lista"));
 el.btnPdf.addEventListener("click", exportarPDF);
 el.btnImprimir.addEventListener("click", () => window.print());
 
-// Header clicável → volta pra lista
 el.topbar.addEventListener("click", () => mostrarTela("lista"));
 el.topbar.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") {
