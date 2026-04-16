@@ -15,17 +15,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   </head>
   <body>
-    <!-- ===== HEADER (clicável → volta pra lista) ===== -->
-    <header
-      class="topbar"
-      id="topbar"
-      role="button"
-      tabindex="0"
-      aria-label="Voltar para a lista de produtos"
-    >
+    <!-- ===== HEADER ===== -->
+    <header class="topbar">
       <div class="topbar__inner">
-        <div class="brand">
-          <!-- Logo do cliente: img é populada via JS; fallback fica escondido -->
+        <!-- Área clicável pra voltar pra lista -->
+        <div
+          class="brand"
+          id="brand-click"
+          role="button"
+          tabindex="0"
+          aria-label="Voltar para a lista de produtos"
+        >
           <img
             id="brand-logo-img"
             class="brand__logo-img"
@@ -39,7 +39,28 @@
             <span class="brand__sub">Tralude Laticínios</span>
           </div>
         </div>
-        <div class="brand__badge">Consultoria JK</div>
+
+        <div class="topbar__actions">
+          <span class="brand__badge">Consultoria JK</span>
+
+          <!-- Botão de login (aparece quando NÃO logado) -->
+          <button id="btn-login" class="btn-topbar" type="button">
+            🔐 Entrar
+          </button>
+
+          <!-- Indicador quando logado -->
+          <div id="login-info" class="login-info" hidden>
+            <span class="login-info__badge">🔓 Editando</span>
+            <button
+              id="btn-logout"
+              class="login-info__sair"
+              type="button"
+              title="Sair do modo edição"
+            >
+              Sair
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -53,30 +74,49 @@
           </p>
         </div>
 
-        <div class="search">
-          <svg
-            class="search__icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            type="text"
-            id="busca"
-            class="search__input"
-            placeholder="Buscar produto..."
-            autocomplete="off"
-          />
+        <div class="lista-acoes">
+          <div class="search">
+            <svg
+              class="search__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="text"
+              id="busca"
+              class="search__input"
+              placeholder="Buscar produto..."
+              autocomplete="off"
+            />
+            <button
+              id="btn-limpar-busca"
+              class="search__clear"
+              aria-label="Limpar busca"
+            >
+              ×
+            </button>
+          </div>
+
           <button
-            id="btn-limpar-busca"
-            class="search__clear"
-            aria-label="Limpar busca"
+            id="btn-novo-produto"
+            class="btn btn--primary btn--compacto"
+            type="button"
+            hidden
           >
-            ×
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Novo produto
           </button>
         </div>
 
@@ -109,10 +149,8 @@
           <span>Carregando ficha técnica...</span>
         </div>
 
-        <!-- Conteúdo que vai pro PDF -->
         <div id="ficha-conteudo" class="ficha" hidden>
           <div class="ficha__header">
-            <!-- Foto do produto -->
             <div class="ficha__foto-wrap">
               <img id="ficha-foto" class="ficha__foto" alt="" hidden />
               <div id="ficha-foto-placeholder" class="ficha__foto-placeholder">
@@ -153,7 +191,6 @@
 
           <h3 class="ficha__subtitulo">Composição de insumos</h3>
 
-          <!-- Tabela (desktop) — sem coluna Status -->
           <div class="tabela-wrap">
             <table id="tabela-insumos" class="tabela">
               <thead>
@@ -170,7 +207,6 @@
             </table>
           </div>
 
-          <!-- Cards (mobile) -->
           <div id="insumos-cards" class="insumos-cards"></div>
         </div>
 
@@ -206,6 +242,31 @@
             </svg>
             Imprimir
           </button>
+          <button id="btn-editar" class="btn btn--ghost" type="button" hidden>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+            </svg>
+            Editar
+          </button>
+          <button id="btn-deletar" class="btn btn--perigo" type="button" hidden>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+            </svg>
+            Deletar
+          </button>
         </div>
       </section>
     </main>
@@ -215,6 +276,166 @@
         © 2026 JK Consultoria Empresarial · Desenvolvido para Tralude Laticínios
       </p>
     </footer>
+
+    <!-- ========== MODAL: LOGIN ========== -->
+    <div id="modal-login" class="modal" hidden>
+      <div class="modal__overlay" data-close></div>
+      <div class="modal__box modal__box--sm" role="dialog" aria-modal="true">
+        <div class="modal__header">
+          <h3 class="modal__title">🔐 Entrar no modo edição</h3>
+          <button class="modal__close" data-close aria-label="Fechar">×</button>
+        </div>
+        <div class="modal__body">
+          <p class="modal__intro">
+            Digite a senha para habilitar edição, criação e exclusão de fichas.
+          </p>
+          <form id="form-login" autocomplete="off">
+            <label class="form-label" for="senha-input">Senha</label>
+            <input
+              type="password"
+              id="senha-input"
+              class="form-input"
+              placeholder="Digite a senha"
+              required
+            />
+            <div id="login-erro" class="form-erro" hidden></div>
+            <div class="modal__footer">
+              <button type="button" class="btn btn--ghost" data-close>
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="btn btn--primary"
+                id="btn-login-submit"
+              >
+                Entrar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: EDITOR DE FICHA ========== -->
+    <div id="modal-editor" class="modal" hidden>
+      <div class="modal__overlay" data-close-editor></div>
+      <div class="modal__box modal__box--lg" role="dialog" aria-modal="true">
+        <div class="modal__header">
+          <h3 class="modal__title" id="editor-titulo">Editar ficha</h3>
+          <button class="modal__close" data-close-editor aria-label="Fechar">
+            ×
+          </button>
+        </div>
+        <div class="modal__body">
+          <div class="editor-grid">
+            <!-- Coluna esquerda: campos -->
+            <div class="editor-form">
+              <label class="form-label" for="editor-produto"
+                >Nome do produto</label
+              >
+              <input
+                type="text"
+                id="editor-produto"
+                class="form-input"
+                placeholder="Ex: QUEIJO TIPO MUSS 0,500 KG TRAL"
+              />
+
+              <label class="form-label" for="editor-imagem"
+                >URL da imagem
+                <span class="form-label__opt">(opcional)</span></label
+              >
+              <input
+                type="text"
+                id="editor-imagem"
+                class="form-input"
+                placeholder="https://drive.google.com/file/d/..."
+              />
+
+              <div class="editor-insumos-header">
+                <h4 class="editor-subtitulo">Insumos</h4>
+                <button
+                  type="button"
+                  id="btn-add-insumo"
+                  class="btn btn--ghost btn--compacto"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Adicionar
+                </button>
+              </div>
+
+              <div id="editor-linhas" class="editor-linhas"></div>
+
+              <div id="editor-erro" class="form-erro" hidden></div>
+            </div>
+
+            <!-- Coluna direita: preview -->
+            <aside class="editor-preview">
+              <div class="editor-preview__card">
+                <p class="card__label">Custo total estimado</p>
+                <p id="preview-custo" class="card__valor card__valor--destaque">
+                  R$ 0,00
+                </p>
+              </div>
+              <div class="editor-preview__card">
+                <p class="card__label">Itens na ficha</p>
+                <p id="preview-itens" class="card__valor">0</p>
+              </div>
+              <p class="editor-preview__aviso">
+                ℹ️ Valores calculados no navegador. A planilha recalcula ao
+                salvar.
+              </p>
+            </aside>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button
+            type="button"
+            class="btn btn--ghost"
+            data-close-editor
+            id="btn-editor-cancelar"
+          >
+            Cancelar
+          </button>
+          <button type="button" class="btn btn--primary" id="btn-editor-salvar">
+            💾 Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL: CONFIRMAÇÃO (genérico) ========== -->
+    <div id="modal-confirm" class="modal" hidden>
+      <div class="modal__overlay"></div>
+      <div class="modal__box modal__box--sm" role="dialog" aria-modal="true">
+        <div class="modal__header">
+          <h3 class="modal__title" id="confirm-titulo">Confirmar</h3>
+        </div>
+        <div class="modal__body">
+          <p id="confirm-msg" class="modal__intro"></p>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="confirm-cancelar">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn--perigo" id="confirm-ok">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TOAST ========== -->
+    <div id="toast" class="toast" hidden></div>
+
+    <!-- Datalist de insumos — populada dinamicamente -->
+    <datalist id="datalist-insumos"></datalist>
 
     <script src="app.js"></script>
   </body>
